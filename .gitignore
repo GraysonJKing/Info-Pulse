@@ -1,0 +1,12 @@
+.env
+__pycache__/
+*.pyc
+data/feeds/
+data/triage/
+data/analysis/
+data/personalised/
+data/articles.json
+data/todays_notable.json
+data/users.json
+.claude/
+plan.md

@@ -1,0 +1,20 @@
+[
+  {
+    "username": "grayson",
+    "display_name": "Grayson",
+    "positions": [
+      {
+        "asset": "VGS",
+        "asset_tags": ["equities_global", "reit"],
+        "direction": "long",
+        "notes": "Currently in VGS"
+      },
+      {
+        "asset": "VAS",
+        "asset_tags": ["equities_au"],
+        "direction": "long",
+        "notes": "Currently in VAS"
+      }
+    ]
+  }
+]
