@@ -10,7 +10,7 @@ The pipeline runs in `main.py` and executes these steps:
 1. **Cleanup** (`steps/cleanup.py`)
   - Clears ephemeral output folders/files from the previous run.
 2. **Fetch + Dedup** (`steps/fetch.py`)
-  - Pulls 8 Google News RSS feeds.
+  - Pulls 17 Google News RSS feeds (broad headlines, macro/rates, geopolitics, energy/commodities, ASX/AU equities, US markets, and currencies).
   - Deduplicates by GUID and filters out old stories (default: older than 24h).
   - Writes article chunks for parallel triage.
 3. **Triage** (`agents/triage.py`)
