@@ -7,6 +7,5 @@ data/analysis/
 data/personalised/
 data/articles.json
 data/todays_notable.json
-data/users.json
 .claude/
 plan.md

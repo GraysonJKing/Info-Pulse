@@ -41,8 +41,7 @@ The pipeline runs in `main.py` and executes these steps:
 ├─ utils/
 ├─ prompts/
 └─ data/
-   ├─ users_example.json
-   ├─ users.json              # ignored by git, create locally
+   ├─ users.json
    ├─ memory.md
    ├─ feeds/
    ├─ triage/
@@ -72,7 +71,7 @@ ANTHROPIC_API_KEY=your_key_here
 grayson_teams_webhook=https://your-teams-webhook-url
 ```
 
-1. Create `data/users.json` (use `data/users_example.json` as a starting point).
+1. Create `data/users.json`.
    - Keep `username` values in sync with env variable names.
    - Delivery reads Teams webhook from `{username}_teams_webhook` (and also supports `{USERNAME}_TEAMS_WEBHOOK`).
 
