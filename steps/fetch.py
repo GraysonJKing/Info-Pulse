@@ -1,14 +1,16 @@
 """Step 1 — RSS fetch, dedup, age filter, and chunking.
 
-Polls 8 Google News RSS feeds, deduplicates by GUID, discards articles
-older than 24 hours, writes the full list to articles.json, and splits
-into 8 chunk files for parallel triage.
+Polls Google News RSS feeds (topic feeds + targeted search feeds),
+deduplicates by GUID, discards articles older than 24 hours, writes
+the full list to articles.json, and splits into chunks for parallel triage.
 """
 
 import logging
 import math
+import re
 from datetime import datetime, timezone
 from email.utils import parsedate_to_datetime
+from urllib.parse import urlparse, parse_qs
 
 import feedparser
 
@@ -22,6 +24,29 @@ from config import (
 from utils.io import write_json
 
 logger = logging.getLogger(__name__)
+
+
+def _feed_name(url: str) -> str:
+    """Derive a short human-readable name from a feed URL for logging."""
+    parsed = urlparse(url)
+    path = parsed.path
+
+    # Topic feed: /rss/headlines/section/topic/BUSINESS
+    topic_match = re.search(r"/topic/(\w+)", path)
+    if topic_match:
+        locale = parse_qs(parsed.query).get("gl", [""])[0].lower()
+        return f"{locale}_{topic_match.group(1).lower()}"
+
+    # Search feed: /rss/search?q=federal+reserve+interest+rate
+    qs = parse_qs(parsed.query)
+    if "q" in qs:
+        query_terms = qs["q"][0].replace("+", "_").replace(" ", "_")[:30]
+        locale = qs.get("gl", [""])[0].lower()
+        return f"{locale}_{query_terms}"
+
+    # Top-level feed: /rss?hl=en-US
+    locale = qs.get("gl", [""])[0].lower() if "gl" in qs else ""
+    return f"{locale}_headlines" if locale else "headlines"
 
 
 def _parse_entry(entry: dict, feed_name: str) -> dict | None:
@@ -80,9 +105,8 @@ def run() -> list[dict]:
     seen_guids: set[str] = set()
     articles: list[dict] = []
 
-    for feed_cfg in FEEDS:
-        name = feed_cfg["name"]
-        url = feed_cfg["url"]
+    for url in FEEDS:
+        name = _feed_name(url)
         logger.info("Fetching %s ...", name)
 
         try:

@@ -77,6 +77,32 @@ async def _run_pipeline() -> None:
         logging.info("Pipeline complete (quiet brief) in %.1fs", elapsed)
         return
 
+    # Filter to severity floor before expensive Sonnet analysis
+    from config import MIN_PERSONALISE_SEVERITY, MAX_PERSONALISE_STORIES
+    pre_filter = len(notable)
+    notable = [s for s in notable if s.get("severity", 0) >= MIN_PERSONALISE_SEVERITY]
+    notable = notable[:MAX_PERSONALISE_STORIES]
+    logging.info("Filtered %d -> %d stories (severity >= %d, max %d)",
+                 pre_filter, len(notable), MIN_PERSONALISE_SEVERITY, MAX_PERSONALISE_STORIES)
+
+    if not notable:
+        logging.info("No stories above severity floor — sending quiet briefs")
+        from config import USERS_FILE
+        from utils.io import read_json
+        if USERS_FILE.exists():
+            users = read_json(USERS_FILE)
+            if isinstance(users, list):
+                for user in users:
+                    username = user.get("username", "unknown")
+                    write_text(
+                        PERSONALISED_DIR / f"{username}.md",
+                        "No market-moving developments overnight. All quiet on your positions.",
+                    )
+        deliver(quiet=True)
+        elapsed = time.monotonic() - start
+        logging.info("Pipeline complete (quiet brief) in %.1fs", elapsed)
+        return
+
     # Step 3 — Analysis
     logging.info("=" * 60)
     logging.info("STEP 3 — Analysis (%dx parallel)", len(notable))

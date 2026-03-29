@@ -43,17 +43,33 @@ HAIKU_MODEL: str = "claude-haiku-4-5"
 SONNET_MODEL: str = "claude-sonnet-4-6"
 
 # ---------------------------------------------------------------------------
-# RSS Feed URLs — Google News
+# RSS Feed URLs — Google News (topic feeds + targeted search feeds)
 # ---------------------------------------------------------------------------
-FEEDS: list[dict[str, str]] = [
-    {"name": "us_headlines", "url": "https://news.google.com/rss?pz=1&cf=all&hl=en-US&topic=h&num=100&gl=US&ceid=US:en"},
-    {"name": "us_world", "url": "https://news.google.com/rss?pz=1&cf=all&hl=en-US&topic=w&num=100&gl=US&ceid=US:en"},
-    {"name": "us_business", "url": "https://news.google.com/rss?pz=1&cf=all&hl=en-US&topic=b&num=100&gl=US&ceid=US:en"},
-    {"name": "us_technology", "url": "https://news.google.com/rss?pz=1&cf=all&hl=en-US&topic=tc&num=100&gl=US&ceid=US:en"},
-    {"name": "au_headlines", "url": "https://news.google.com/rss?pz=1&cf=all&hl=en-AU&topic=h&num=100&gl=AU&ceid=AU:en"},
-    {"name": "au_world", "url": "https://news.google.com/rss?pz=1&cf=all&hl=en-AU&topic=w&num=100&gl=AU&ceid=AU:en"},
-    {"name": "au_business", "url": "https://news.google.com/rss?pz=1&cf=all&hl=en-AU&topic=b&num=100&gl=AU&ceid=AU:en"},
-    {"name": "us_science", "url": "https://news.google.com/rss?pz=1&cf=all&hl=en-US&topic=snc&num=100&gl=US&ceid=US:en"},
+FEEDS: list[str] = [
+    # Broad headlines (black swan safety net)
+    "https://news.google.com/rss?hl=en-US&gl=US&ceid=US:en",
+    "https://news.google.com/rss?hl=en-AU&gl=AU&ceid=AU:en",
+    "https://news.google.com/rss/headlines/section/topic/WORLD?hl=en-US&gl=US&ceid=US:en",
+    "https://news.google.com/rss/headlines/section/topic/BUSINESS?hl=en-US&gl=US&ceid=US:en",
+    # Macro / rates
+    "https://news.google.com/rss/search?q=federal+reserve+interest+rate&when:1d&ceid=US:en&hl=en-US&gl=US",
+    "https://news.google.com/rss/search?q=RBA+interest+rate+australia&when:1d&ceid=AU:en&hl=en-AU&gl=AU",
+    "https://news.google.com/rss/search?q=inflation+CPI+economy&when:1d&ceid=US:en&hl=en-US&gl=US",
+    # Geopolitics
+    "https://news.google.com/rss/search?q=war+sanctions+military+strike&when:1d&ceid=US:en&hl=en-US&gl=US",
+    "https://news.google.com/rss/search?q=iran+china+russia+geopolitics&when:1d&ceid=US:en&hl=en-US&gl=US",
+    "https://news.google.com/rss/search?q=tariff+trade+deal+sanctions&when:1d&ceid=US:en&hl=en-US&gl=US",
+    # Energy / commodities
+    "https://news.google.com/rss/search?q=oil+price+opec+gas+energy&when:1d&ceid=US:en&hl=en-US&gl=US",
+    "https://news.google.com/rss/search?q=lithium+iron+ore+copper+commodities&when:1d&ceid=AU:en&hl=en-AU&gl=AU",
+    # ASX / Australia
+    "https://news.google.com/rss/search?q=ASX+australia+market+shares&when:1d&ceid=AU:en&hl=en-AU&gl=AU",
+    "https://news.google.com/rss/search?q=woodside+BHP+rio+tinto+fortescue&when:1d&ceid=AU:en&hl=en-AU&gl=AU",
+    # US markets
+    "https://news.google.com/rss/search?q=nasdaq+sp500+wall+street+earnings&when:1d&ceid=US:en&hl=en-US&gl=US",
+    "https://news.google.com/rss/search?q=tesla+nvidia+apple+microsoft+earnings&when:1d&ceid=US:en&hl=en-US&gl=US",
+    # Currencies
+    "https://news.google.com/rss/search?q=USD+AUD+JPY+dollar+currency&when:1d&ceid=US:en&hl=en-US&gl=US",
 ]
 
 # ---------------------------------------------------------------------------
