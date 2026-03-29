@@ -12,6 +12,7 @@ from claude_agent_sdk import ResultMessage, query
 
 from agents.definitions import personalise_options
 from config import ANALYSIS_DIR, MAX_PERSONALISE_STORIES, MEMORY_FILE, MIN_PERSONALISE_SEVERITY, PERSONALISED_DIR, USERS_FILE
+from utils.error_logging import describe_exception
 from utils.io import read_json, read_text, write_text
 
 logger = logging.getLogger(__name__)
@@ -64,9 +65,13 @@ async def _personalise_for_user(user: dict, analyses_text: str, memory_text: str
     options = personalise_options()
     result_text = ""
 
-    async for message in query(prompt=prompt, options=options):
-        if isinstance(message, ResultMessage):
-            result_text = message.result
+    try:
+        async for message in query(prompt=prompt, options=options):
+            if isinstance(message, ResultMessage):
+                result_text = message.result
+    except Exception as exc:
+        logger.exception("Personaliser query failed for '%s'\n%s", username, describe_exception(exc))
+        raise
 
     if not result_text.strip():
         logger.warning("Personaliser for '%s' returned empty response", username)
@@ -108,7 +113,7 @@ async def run(analyses: list[dict]) -> dict[str, str]:
     for i, result in enumerate(results):
         username = users[i].get("username", f"user_{i}")
         if isinstance(result, Exception):
-            logger.error("Personaliser for '%s' failed: %s", username, result)
+            logger.error("Personaliser for '%s' failed\n%s", username, describe_exception(result))
         elif result is not None:
             briefs[username] = result
 

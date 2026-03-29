@@ -15,6 +15,7 @@ from claude_agent_sdk import ClaudeAgentOptions
 
 from agents.definitions import triage_options
 from config import ASSET_TAGS, FEEDS_DIR, HAIKU_MODEL, MEMORY_FILE, NOTABLES_FILE, TRIAGE_CHUNK_COUNT, TRIAGE_DIR
+from utils.error_logging import describe_exception
 from utils.io import parse_llm_json, read_json, read_text, write_json
 
 logger = logging.getLogger(__name__)
@@ -48,9 +49,13 @@ async def _triage_chunk(chunk_index: int, memory_text: str) -> list[dict]:
     options = triage_options()
     result_text = ""
 
-    async for message in query(prompt=prompt, options=options):
-        if isinstance(message, ResultMessage):
-            result_text = message.result
+    try:
+        async for message in query(prompt=prompt, options=options):
+            if isinstance(message, ResultMessage):
+                result_text = message.result
+    except Exception as exc:
+        logger.exception("Shard %d: triage query failed\n%s", chunk_index, describe_exception(exc))
+        raise
 
     if not result_text.strip():
         logger.warning("Shard %d: agent returned empty response", chunk_index)
@@ -85,7 +90,7 @@ async def run() -> list[dict]:
     all_notable: list[dict] = []
     for i, result in enumerate(results):
         if isinstance(result, Exception):
-            logger.error("Shard %d failed: %s", i, result)
+            logger.error("Shard %d failed\n%s", i, describe_exception(result))
             shard_data = []
         else:
             shard_data = result
@@ -150,9 +155,13 @@ async def _cluster_by_topic(stories: list[dict]) -> list[dict]:
     )
 
     result_text = ""
-    async for message in query(prompt=prompt, options=options):
-        if isinstance(message, ResultMessage):
-            result_text = message.result
+    try:
+        async for message in query(prompt=prompt, options=options):
+            if isinstance(message, ResultMessage):
+                result_text = message.result
+    except Exception as exc:
+        logger.exception("Topic clustering query failed\n%s", describe_exception(exc))
+        return stories
 
     if not result_text.strip():
         logger.warning("Topic clustering returned empty — skipping")

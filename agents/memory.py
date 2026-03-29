@@ -14,6 +14,7 @@ from claude_agent_sdk import ResultMessage, query
 
 from agents.definitions import memory_options
 from config import MAX_ACTIVE_STORIES, MEMORY_FILE, NOTABLES_FILE, PURGE_CLOSED_DAYS, STALE_CLOSE_DAYS
+from utils.error_logging import describe_exception
 from utils.io import read_text, write_text, read_json
 
 logger = logging.getLogger(__name__)
@@ -39,9 +40,13 @@ async def _curate_with_llm(memory_text: str, notables_text: str) -> str:
     options = memory_options()
     result_text = ""
 
-    async for message in query(prompt=prompt, options=options):
-        if isinstance(message, ResultMessage):
-            result_text = message.result
+    try:
+        async for message in query(prompt=prompt, options=options):
+            if isinstance(message, ResultMessage):
+                result_text = message.result
+    except Exception as exc:
+        logger.exception("Memory curator query failed\n%s", describe_exception(exc))
+        raise
 
     return result_text.strip()
 
@@ -165,8 +170,8 @@ async def run() -> None:
             logger.info("LLM curator returned updated memory")
         else:
             logger.warning("LLM curator returned empty — using existing memory")
-    except Exception:
-        logger.exception("LLM curator failed — falling back to existing memory")
+    except Exception as exc:
+        logger.exception("LLM curator failed — falling back to existing memory\n%s", describe_exception(exc))
 
     # Python safety net always runs
     final = _python_safety_net(memory_text)

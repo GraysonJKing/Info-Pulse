@@ -14,6 +14,7 @@ from claude_agent_sdk import ResultMessage, query
 
 from agents.definitions import analyst_options
 from config import ANALYSIS_DIR
+from utils.error_logging import describe_exception
 from utils.io import parse_llm_json, write_json
 from utils.slugify import slugify
 
@@ -47,9 +48,13 @@ async def _analyse_story(story: dict) -> dict | None:
     options = analyst_options()
     result_text = ""
 
-    async for message in query(prompt=prompt, options=options):
-        if isinstance(message, ResultMessage):
-            result_text = message.result
+    try:
+        async for message in query(prompt=prompt, options=options):
+            if isinstance(message, ResultMessage):
+                result_text = message.result
+    except Exception as exc:
+        logger.exception("Analyst query failed for '%s'\n%s", title, describe_exception(exc))
+        raise
 
     if not result_text.strip():
         logger.warning("Analyst for '%s' returned empty response", title)
@@ -95,7 +100,7 @@ async def run(notable_stories: list[dict]) -> list[dict]:
     analyses: list[dict] = []
     for i, result in enumerate(results):
         if isinstance(result, Exception):
-            logger.error("Analyst %d failed: %s", i, result)
+            logger.error("Analyst %d failed\n%s", i, describe_exception(result))
         elif result is not None:
             analyses.append(result)
 
